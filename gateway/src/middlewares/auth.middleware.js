@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 
 const SECRET = process.env.JWT_SECRET || "clave_secreta_de_clase";
 
-// AUTENTICACIÓN: ¿el token es válido?
+// AUTENTICACION: el token es valido?
 const verificarToken = (req, res, next) => {
   const header = req.headers["authorization"];
 
@@ -21,7 +21,7 @@ const verificarToken = (req, res, next) => {
   }
 };
 
-// AUTORIZACIÓN: ¿tiene el rol necesario?
+// AUTORIZACIoN: tiene el rol necesario?
 const soloAdmin = (req, res, next) => {
   if (req.usuario.rol !== "admin") {
     return res.status(403).json({ mensaje: "No tienes permisos para esta acción" });
