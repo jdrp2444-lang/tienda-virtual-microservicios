@@ -16,7 +16,10 @@ const reenviar = (baseUrl) => async (req, res) => {
       method: req.method,
       url: baseUrl + req.originalUrl,
       data: req.body,
-      headers: { "x-usuario-id": req.usuario ? req.usuario.id : "" },
+      headers: {
+  "x-usuario-id": req.usuario ? req.usuario.id : "",
+  "x-usuario-rol": req.usuario ? req.usuario.rol : "",
+},
     });
     res.status(respuesta.status).json(respuesta.data);
   } catch (error) {
@@ -28,11 +31,11 @@ const reenviar = (baseUrl) => async (req, res) => {
   }
 };
 
-// Rutas PÚBLICAS (no requieren token)
+// Rutas PUBLICAS (no requieren token)
 router.post("/auth/register", reenviar(USUARIOS_URL));
 router.post("/auth/login", reenviar(USUARIOS_URL));
 
-// Rutas PROTEGIDAS (requieren JWT válido)
+// Rutas PROTEGIDAS (requieren JWT va-lido)
 router.get("/usuarios/:id", verificarToken, reenviar(USUARIOS_URL));
 
 router.get("/productos", verificarToken, reenviar(PRODUCTOS_URL));
