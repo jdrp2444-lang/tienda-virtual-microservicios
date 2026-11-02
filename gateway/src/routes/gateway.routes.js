@@ -5,11 +5,10 @@ const { verificarToken, soloAdmin } = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
-const USUARIOS_URL = "http://localhost:3001";
-const PRODUCTOS_URL = "http://localhost:3002";
-const PEDIDOS_URL = "http://localhost:3003";
+const USUARIOS_URL = process.env.USUARIOS_URL || "http://localhost:3001";
+const PRODUCTOS_URL = process.env.PRODUCTOS_URL || "http://localhost:3002";
+const PEDIDOS_URL = process.env.PEDIDOS_URL || "http://localhost:3003";
 
-// Función que reenvía la petición al microservicio y devuelve su respuesta
 const reenviar = (baseUrl) => async (req, res) => {
   try {
     const respuesta = await axios({

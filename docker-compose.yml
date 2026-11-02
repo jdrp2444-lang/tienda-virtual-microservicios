@@ -1,0 +1,26 @@
+services:
+  ms-usuarios:
+    build: ./ms-usuarios
+    image: juanda444/tienda-ms-usuarios
+
+  ms-productos:
+    build: ./ms-productos
+    image: juanda444/tienda-ms-productos
+
+  ms-pedidos:
+    build: ./ms-pedidos
+    image: juanda444/tienda-ms-pedidos
+
+  gateway:
+    build: ./gateway
+    image: juanda444/tienda-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      USUARIOS_URL: http://ms-usuarios:3001
+      PRODUCTOS_URL: http://ms-productos:3002
+      PEDIDOS_URL: http://ms-pedidos:3003
+    depends_on:
+      - ms-usuarios
+      - ms-productos
+      - ms-pedidos
