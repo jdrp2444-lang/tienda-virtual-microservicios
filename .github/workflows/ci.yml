@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        servicio: [ms-usuarios, ms-productos]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Instalar dependencias
+        run: npm ci
+        working-directory: ${{ matrix.servicio }}
+      - name: Pruebas básicas
+        run: npm test
+        working-directory: ${{ matrix.servicio }}
+
+  docker:
+    needs: pruebas
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        servicio: [gateway, ms-usuarios, ms-productos, ms-pedidos]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Construir y publicar imagen
+        uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.servicio }}
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tienda-${{ matrix.servicio }}:latest
