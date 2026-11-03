@@ -35,7 +35,11 @@ Una tienda virtual construida con **microservicios** en Node.js, donde cada serv
 - jsonwebtoken (generación y validación del JWT)
 - bcryptjs (encriptación de contraseñas)
 - Git y GitHub (control de versiones con ramas por microservicio)
-- Postman (pruebas)
+- Postman y curl (pruebas)
+- Docker y Docker Compose (contenerización)
+- Docker Hub (publicación de imágenes)
+- GitHub Actions (integración continua)
+- Zabbix (herramienta de monitoreo investigada)
 
 ## Arquitectura
 
@@ -119,6 +123,27 @@ Todas las peticiones se hacen al Gateway (`http://localhost:3000`).
 
 ## Cómo ejecutar
 
+### Opción A: con Docker (recomendada)
+
+Requisitos: Docker Desktop y Git.
+
+```bash
+git clone https://github.com/jdrp2444-lang/tienda-virtual-microservicios.git
+cd tienda-virtual-microservicios
+docker compose up --build
+```
+
+El Gateway queda disponible en `http://localhost:3000`. Para apagar todo: `docker compose down`.
+
+Para usar las imágenes ya publicadas en Docker Hub, sin construirlas:
+
+```bash
+docker compose pull
+docker compose up
+```
+
+### Opción B: sin Docker
+
 Requisitos: Node.js y Git.
 
 ```bash
@@ -152,6 +177,39 @@ Con `POST http://localhost:3000/productos`:
 | Cliente | 403 "No tienes permisos para esta acción" |
 | Administrador | 201 producto creado |
 
+## Contenerización con Docker
+
+Cada microservicio tiene su propio `Dockerfile` y `.dockerignore`. Un `docker-compose.yml` en la raíz levanta los cuatro servicios en una red interna.
+
+- Imagen base: `node:24-alpine`.
+- Solo el Gateway publica un puerto (3000). Los demás microservicios solo son accesibles dentro de la red de Docker, por lo que el Gateway es la única entrada.
+- El Gateway encuentra a los demás servicios por su nombre (`ms-usuarios`, `ms-productos`, `ms-pedidos`) mediante variables de entorno.
+
+Imágenes publicadas en Docker Hub:
+
+| Servicio | Imagen |
+|---|---|
+| Gateway | `juanda444/tienda-gateway` |
+| MS Usuarios | `juanda444/tienda-ms-usuarios` |
+| MS Productos | `juanda444/tienda-ms-productos` |
+| MS Pedidos | `juanda444/tienda-ms-pedidos` |
+
+## Integración continua (GitHub Actions)
+
+El workflow `.github/workflows/ci.yml` se ejecuta en cada push a `main`:
+
+1. **Checkout** del código.
+2. **Instalación de dependencias** (`npm ci`) de MS Usuarios y MS Productos.
+3. **Pruebas básicas** (`npm test`, con el ejecutor de pruebas integrado de Node).
+4. **Construcción** de la imagen Docker de cada servicio.
+5. **Push** de las imágenes a Docker Hub.
+
+Los trabajos de Docker solo corren si las pruebas pasan. Las credenciales de Docker Hub se guardan como secretos del repositorio (`DOCKERHUB_TOKEN`), nunca dentro del código.
+
+## Monitoreo (Zabbix)
+
+Zabbix es una plataforma de monitoreo de infraestructura. Sus componentes principales son el servidor, la base de datos, la interfaz web y los agentes, que se instalan en las máquinas monitoreadas y envían métricas como CPU y memoria. Sobre esas métricas se definen triggers (por ejemplo, "CPU superior al 80%") y acciones que generan alertas. En este proyecto se investigó la herramienta a nivel teórico y no se implementó.
+
 ## Flujo de trabajo con Git
 
-Cada microservicio se desarrolló en su propia rama (`ms-usuarios`, `ms-productos`, `ms-pedidos` y `gateway`) y luego se integraron en `main` mediante `merge`.
+Cada microservicio se desarrolló en su propia rama (`ms-usuarios`, `ms-productos`, `ms-pedidos` y `gateway`). La contenerización se hizo en la rama `docker` y el pipeline en la rama `ci`. Todo se integró en `main` mediante `merge`.
