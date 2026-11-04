@@ -4,8 +4,7 @@ Proyecto de la asignatura **DevOps – WebApps** (Universidad de Manizales).
 Docente: Jhonathan Rodriguez Ramirez.
 
 ## Integrantes
-
-- Juan David Ramirez Parra
+- Juan Diego lozada
 
 ## Problema
 
